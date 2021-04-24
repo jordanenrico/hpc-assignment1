@@ -6,7 +6,7 @@
 #include "graphics.h"
 #include "file_operations.h"
 
-int calcAccel(int N, const int G, double* mass, double* xPos, double* yPos, double* xAccelNew, double* yAccelNew){
+int calcAccel(int N, const double G, double* mass, double* xPos, double* yPos, double* xAccelNew, double* yAccelNew){
     /* Fills up xAccelNew and yAccelNew with magnitude and direction of the acceleration.
        xPotentSum = x component of the sum of mass_j*rVec/r^3 values experienced by planet i from planet j.
        yPotentSum = y component of the sum of mass_j*rVec/r^3 values experienced by planet i from planet j. */
