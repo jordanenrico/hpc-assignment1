@@ -61,8 +61,7 @@ int main(int argc, char *argv[]){
         printf("withGraphics: %i\n\n", withGraphics);
     }
 
-    /*  xPos[i*(nsteps+1)+j] is the x position of planet i at timestep j.
-        We use (nsteps+1) to store nsteps data and the initial condition. */
+    /*  xPos[i] is the latest x position of planet i. */
     double* xPos   = (double*)malloc(N*sizeof(double));
     double* yPos   = (double*)malloc(N*sizeof(double));
     double* xSpeed = (double*)malloc(N*sizeof(double));
@@ -79,6 +78,7 @@ int main(int argc, char *argv[]){
         ySpeed[i] = rawData[i*6+4];
         bright[i] = rawData[i*6+5];
     }
+    free(rawData);
 
     /* empty arrays to store acceleration information */
     double* xAccelNew = (double*)malloc(N*sizeof(double));
@@ -88,7 +88,6 @@ int main(int argc, char *argv[]){
     const float circleRadius = 0.0025, circleColor = 0;
     const int windowWidth = 800;
     float L = 1, W = 1;
-    int i = 0;
     if (withGraphics){
         InitializeGraphics(argv[0],windowWidth,windowWidth);
         SetCAxes(0,1);
@@ -145,7 +144,6 @@ int main(int argc, char *argv[]){
     }
 
     /* freeing memory */
-    free(rawData);
     free(xPos);
     free(yPos);
     free(xSpeed);
