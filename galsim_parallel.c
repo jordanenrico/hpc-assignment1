@@ -20,8 +20,6 @@ int calcAccel(const int N, const double G, double* mass, double* xPos, double* y
 
         i = floor(ij/N);
         j = ij%N;
-        xPartialAccel = 0.0;
-        yPartialAccel = 0.0;
 
         if (i!=j){
             magnitude     = sqrt(pow(xPos[i] - xPos[j], 2) + pow(yPos[i] - yPos[j], 2)) + epsilon;
@@ -54,8 +52,10 @@ int main(int argc, char *argv[]){
     const double G   = 100.0/N;
     int nData        = N*6;
     double* rawData  = (double*)malloc(nData*sizeof(double));
-    struct timeval begin, end;
-    double elapsed = 0.0;
+    struct timeval begin, end, beginGlob, endGlob;
+    double elapsed = 0.0, elapsedGlob = 0.0;
+    
+    gettimeofday(&beginGlob, NULL);
 
     /* reading initial conditions from a file*/
     int isRead = read_doubles_from_file(nData, rawData, filename);
@@ -112,10 +112,12 @@ int main(int argc, char *argv[]){
             xAccelNew[i] = 0.0;
             yAccelNew[i] = 0.0;
         }
+
         gettimeofday(&begin, NULL);
         calcAccel(N, G, mass, xPos, yPos, xAccelNew, yAccelNew, nThreads); //calculates accelerations at this iteration
         gettimeofday(&end, NULL);
         elapsed += (end.tv_sec - begin.tv_sec) + ((end.tv_usec - begin.tv_usec)/1000000.0);
+
         #pragma omp parallel for num_threads(nThreads)
         for (int i=0; i<N; i++){ //calculates new positions and speeds
             xSpeed[i] += xAccelNew[i]*delta_t;
@@ -124,7 +126,7 @@ int main(int argc, char *argv[]){
             xPos[i] += xSpeed[i]*delta_t;
             yPos[i] += ySpeed[i]*delta_t;
         }
-        
+
         if (withGraphics){ //graphics routine
             ClearScreen();
             #pragma omp parallel for num_threads(nThreads)
@@ -144,7 +146,6 @@ int main(int argc, char *argv[]){
         FlushDisplay();
         CloseDisplay();
     }
-    printf("Progress: COMPLETE (calcAccel function runtime is %f seconds)\n", elapsed);
 
     /* preparing data for saving */
     double* output = (double*)malloc(nData*sizeof(double));
@@ -177,6 +178,10 @@ int main(int argc, char *argv[]){
     free(xAccelNew);
     free(yAccelNew);
     free(output);
+
+    gettimeofday(&endGlob, NULL);
+    elapsedGlob = (endGlob.tv_sec - beginGlob.tv_sec) + ((endGlob.tv_usec - beginGlob.tv_usec)/1000000.0);
+    printf("Progress: COMPLETE (calcAccel function runtime is %f seconds which is %.6f%% of the total runtime)\n", elapsed, elapsed/elapsedGlob*100);
 
     return 0;
 }
